@@ -135,8 +135,8 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
             #print(f'+++++++++++++ lambda : {lambda_val}+++++++++++')
 
             for i in range(len(delegate_queue)):
-                delegate_queue[i].score = lambda_val * normalized_req_num_cores_list[i] + (1 - lambda_val) * \
-                                          normalized_pending_time_list[i]
+                # scoring에서 lambda 고려 X
+                delegate_queue[i].score =  normalized_req_num_cores_list[i] * normalized_pending_time_list[i]
 
             delegate_queue.sort(key=lambda x: x.score, reverse=True)
 
