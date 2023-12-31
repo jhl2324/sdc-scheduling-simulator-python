@@ -1,12 +1,6 @@
-from datetime import datetime
+import time
+import math
 
 
-def time(time_unit):
-    dt = datetime.now()
-
-    if time_unit == 's':
-        return dt.second
-    elif time_unit == 'ms':
-        return dt.microsecond
-    else:
-        exit(-1)
+def cur_time_ms():
+    return math.floor(time.time_ns() / 1000000)

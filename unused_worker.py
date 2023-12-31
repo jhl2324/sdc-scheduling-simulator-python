@@ -1,32 +1,31 @@
-import timer
 import time
+from timer import cur_time_ms
 from topology import Host
 
-time_unit = 's'  # main으로 옮기기
 scheduling_policy = 'sdc_advanced'  # main으로 옮기기
-flush_period = 2  # main으로 옮기기
+flush_period = 2000  # ms
 is_mid_checked = False
 flush_count = 0
 ou_queue = []
 period_queue = [flush_period, flush_period]
 
-t_st = time.time()
-t_prev = time.time()
-t_curr = time.time()
+t_st = cur_time_ms()
+t_prev = cur_time_ms()
+t_curr = cur_time_ms()
 
-with open('./result/latest_log_lambda', 'w') as lambda_file:
+with open('result/lambda/latest_log_lambda', 'w') as lambda_file:
     pass
-with open('./result/latest_log_flush_period', 'w') as period_file:
+with open('result/period/latest_log_flush_period', 'w') as period_file:
     pass
 
 
 def run_worker(job_log, topo, delegate_queue, submitted_job_queue, fin_job_num):
-    global time_unit, scheduling_policy, flush_period, is_mid_checked, flush_count, ou_queue, period_queue, t_prev, t_curr
+    global scheduling_policy, flush_period, is_mid_checked, flush_count, ou_queue, period_queue, t_prev, t_curr
 
     if len(job_log.jobs) == 0 and len(delegate_queue) == 0:
         return
 
-    t_curr = time.time()
+    t_curr = cur_time_ms()
 
     # submit time이 된 job들을 delegate queue에 submit
     while len(job_log.jobs) > 0:
@@ -36,14 +35,15 @@ def run_worker(job_log, topo, delegate_queue, submitted_job_queue, fin_job_num):
 
         if is_time_to_submit:
             job = job_log.jobs.pop(0)
-            job.submitted_time = time.time()
+            # submitted_time : 로그 상의 submit time => 실제 delegate queue로 submit time으로 변경 => waiting time 구할 때 사용
+            job.submitted_time = cur_time_ms()
             delegate_queue.append(job)
         else:
             break
 
     t_flush = t_curr - t_prev
 
-    is_mid_time_to_flush_sdc_advanced = (t_flush > (flush_period / 2)) and (
+    is_mid_time_to_flush_sdc_advanced = (t_flush > (flush_period / 2000)) and (
             is_mid_checked == False) and scheduling_policy == 'sdc_advanced'
     is_time_to_flush_sdc_advanced = (t_flush > flush_period) and (
             scheduling_policy == 'sdc_advanced')
@@ -82,11 +82,12 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
         for i in range(len(delegate_queue)):
             job = delegate_queue[i]
             submitted_job_queue.append(job)
+            fin_job_num[0] += 1
         delegate_queue.clear()
 
     elif scheduling_policy == 'sdc_vanilla':
         virt_topo = init_virt_topo(topo)
-        cur_time = time.time()
+        cur_time = cur_time_ms()
 
         for i in range(len(delegate_queue)):
             delegate_queue[i].score = delegate_queue[i].required_num_cores * (
@@ -112,7 +113,7 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
                 normalized_req_num_cores_list = list(map(lambda x: 0.5, req_num_cores_list))
 
             pending_time_list = list(
-                map(lambda x: (time.time() - x.submitted_time) / flush_period, delegate_queue))
+                map(lambda x: (cur_time_ms() - x.submitted_time) / flush_period, delegate_queue))
             min_pending_time = min(pending_time_list)
             max_pending_time = max(pending_time_list)
 
@@ -164,14 +165,14 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
         is_mid_checked = False
 
         #print(f'+++++++++++++ period : {flush_period}+++++++++++')
-        with open('./result/latest_log_flush_period', 'a') as file:
+        with open('result/period/latest_log_flush_period', 'a') as file:
             file.write(str(flush_period) + '\n')
-        with open('./result/latest_log_lambda', 'a') as lambda_file:
+        with open('result/lambda/latest_log_lambda', 'a') as lambda_file:
             lambda_file.write(str(lambda_val) + '\n')
 
     global t_prev
     # t_curr 했을 때와 차이 심한가?
-    t_prev = time.time()
+    t_prev = cur_time_ms()
 
 
 def init_virt_topo(topo):

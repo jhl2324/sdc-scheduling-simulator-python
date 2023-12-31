@@ -14,8 +14,7 @@ if __name__ == '__main__':
     ######################
     fn_cluster = "cluster"
     fn_log = "./log/latest_log_sec"
-    fn_res = "./result/latest_log_sdc_advanced"
-    time_unit = 's'
+    fn_res = "./result/latest_sdc_original_score_sleep_applied"
 
     # topo = []
     delegate_queue = []
@@ -51,13 +50,14 @@ if __name__ == '__main__':
     monitor_thread = threading.Thread(target=run_monitor, args=(tplg, topo, fn_res, stop_event, fin_job_num))
     monitor_thread.start()
 
-    while len(job_log.jobs) > 0 or (fin_job_num[0] < total_job_num):
+    while len(job_log.jobs) > 0 or (fin_job_num[4] < total_job_num):
         run_worker(job_log, topo, delegate_queue, submitted_job_queue, fin_job_num)
         run_fetcher(submitted_job_queue, waiting_job_queues, fin_job_num)
 
         for i in range(tplg.num_queue_types):
             run_dispatcher(topo[i], waiting_job_queues[i], executing_job_queues[i], finished_job_queues[i], fin_job_num)
 
+    time.sleep(3)
     stop_event.set()
     monitor_thread.join()
 
