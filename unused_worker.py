@@ -14,9 +14,9 @@ t_st = time.time()
 t_prev = time.time()
 t_curr = time.time()
 
-with open('./result/lambda', 'w') as lambda_file:
+with open('./result/latest_log_lambda', 'w') as lambda_file:
     pass
-with open('./result/flush_period', 'w') as period_file:
+with open('./result/latest_log_flush_period', 'w') as period_file:
     pass
 
 
@@ -95,7 +95,7 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
         two_stage_process(virt_topo, delegate_queue, submitted_job_queue)
 
     elif scheduling_policy == 'sdc_advanced':
-        global flush_period, is_mid_checked, period_queue
+        global flush_period, is_mid_checked, period_queue, lambda_val
         virt_topo = init_virt_topo(topo)
 
         if len(delegate_queue) > 1:
@@ -131,9 +131,7 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
 
             #global period_queue
             lambda_val = 1 / ((period_queue[1] / period_queue[0]) + 1)
-            print(f'+++++++++++++ lambda : {lambda_val}+++++++++++')
-            with open('./result/lambda', 'a') as lambda_file:
-                lambda_file.write(str(lambda_val) + '\n')
+            #print(f'+++++++++++++ lambda : {lambda_val}+++++++++++')
 
             for i in range(len(delegate_queue)):
                 delegate_queue[i].score = lambda_val * normalized_req_num_cores_list[i] + (1 - lambda_val) * \
@@ -165,9 +163,11 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
         period_queue.append(flush_period)
         is_mid_checked = False
 
-        print(f'+++++++++++++ period : {flush_period}+++++++++++')
-        with open('./result/flush_period', 'a') as file:
+        #print(f'+++++++++++++ period : {flush_period}+++++++++++')
+        with open('./result/latest_log_flush_period', 'a') as file:
             file.write(str(flush_period) + '\n')
+        with open('./result/latest_log_lambda', 'a') as lambda_file:
+            lambda_file.write(str(lambda_val) + '\n')
 
     global t_prev
     # t_curr 했을 때와 차이 심한가?
@@ -236,13 +236,13 @@ def two_stage_process(virt_topo, delegate_queue, submitted_job_queue, fin_job_nu
 
     for i in range(len(vec_a)):
         # 65ms 동안 sleep
-        time.sleep(0.0065)
+        #time.sleep(0.0065)
         submitted_job_queue.append(vec_a[i])
         fin_job_num[0] += 1
 
     for i in range(len(vec_b)):
         # 65ms 동안 sleep
-        time.sleep(0.0065)
+        #time.sleep(0.0065)
         submitted_job_queue.append(vec_b[i])
         fin_job_num[0] += 1
 

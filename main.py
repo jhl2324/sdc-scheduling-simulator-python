@@ -13,8 +13,8 @@ if __name__ == '__main__':
     # args 파싱 방식으로 수정하기
     ######################
     fn_cluster = "cluster"
-    fn_log = "./log/2nd_log_10000_scale_sec"
-    fn_res = "./result/2nd_sdc_advanced_sleep(test)"
+    fn_log = "./log/latest_log_sec"
+    fn_res = "./result/latest_log_sdc_advanced"
     time_unit = 's'
 
     # topo = []
