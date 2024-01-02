@@ -1,20 +1,20 @@
 from job import JobLog
 from topology import Topology
-#from worker import run_worker
+
+# from worker import run_worker
 from unused_worker import run_worker
 from scheduler import run_fetcher, run_dispatcher
 from monitor import run_monitor
 import threading
 import time
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     ######################
     # args 파싱 방식으로 수정하기
     ######################
     fn_cluster = "cluster"
-    fn_log = "./log/latest_log_sec"
-    fn_res = "./result/latest_sdc_original_score_sleep_applied"
+    fn_log = "./log/2nd_log_ms"
+    fn_res = "./result/LATEST_fcfs_2nd_log_ms"
 
     # topo = []
     delegate_queue = []
@@ -44,10 +44,12 @@ if __name__ == '__main__':
         executing_job_queues.append(executing_job_queue)
         finished_job_queues.append(finished_job_queue)
 
-    fin_job_num = [0, 0, 0, 0, 0] # delegate / fetcher / dispatcher / execute / release
+    fin_job_num = [0, 0, 0, 0, 0, 0]  # delegate / fetcher / dispatcher / execute / release
 
     stop_event = threading.Event()
-    monitor_thread = threading.Thread(target=run_monitor, args=(tplg, topo, fn_res, stop_event, fin_job_num))
+    monitor_thread = threading.Thread(
+        target=run_monitor, args=(tplg, topo, fn_res, stop_event, fin_job_num)
+    )
     monitor_thread.start()
 
     while len(job_log.jobs) > 0 or (fin_job_num[4] < total_job_num):
@@ -55,10 +57,16 @@ if __name__ == '__main__':
         run_fetcher(submitted_job_queue, waiting_job_queues, fin_job_num)
 
         for i in range(tplg.num_queue_types):
-            run_dispatcher(topo[i], waiting_job_queues[i], executing_job_queues[i], finished_job_queues[i], fin_job_num)
+            run_dispatcher(
+                topo[i],
+                waiting_job_queues[i],
+                executing_job_queues[i],
+                finished_job_queues[i],
+                fin_job_num,
+            )
 
     time.sleep(3)
     stop_event.set()
     monitor_thread.join()
 
-    print('simulation finished')
+    print("simulation finished")

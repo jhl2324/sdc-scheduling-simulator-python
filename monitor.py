@@ -3,7 +3,7 @@ import time
 
 def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
     # result 파일 초기화
-    with open(fn_res, 'w') as file:
+    with open(fn_res, "w") as file:
         pass
 
     num_host = tplg.num_host_types
@@ -23,7 +23,7 @@ def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
     while not stop_event.is_set():
         time.sleep(3)
         ovr_core = 0
-        printer = ''
+        printer = ""
 
         util_core = [0 for i in range(num_host)]
         util_queue = [0 for i in range(num_queue)]
@@ -34,7 +34,7 @@ def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
                 util_core[topo[i][j].host_type] += curr_core
                 util_queue[topo[i][j].queue_type] += curr_core
 
-        printer += '===========[ Iteration '
+        printer += "===========[ Iteration "
         if iteration < 10:
             printer += "    "
         elif iteration < 100:
@@ -46,11 +46,11 @@ def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
         printer += str(iteration)
         printer += " ]=================================================================================================\n"
 
-        printer += '\nutil_core : '
+        printer += "\nutil_core : "
         for i in range(num_host):
             printer += f"{util_core[i]}({tot_core[i] - util_core[i]}) "
 
-        printer += '\nutil_queue : '
+        printer += "\nutil_queue : "
         for i in range(num_queue):
             printer += f"{util_queue[i]}({tot_queue[i] - util_queue[i]}) "
 
@@ -84,10 +84,11 @@ def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
         printer += f" dispatcher_job_num : {fin_job_num[2]}"
         printer += f" execute_job_num : {fin_job_num[3]}"
         printer += f" release_job_num : {fin_job_num[4]}"
+        printer += f" now_executing_job_num : {fin_job_num[5]}"
 
         print(printer)
         # if flag_fout:
-        with open(fn_res, 'a') as file:
+        with open(fn_res, "a") as file:
             file.write(printer + "\n")
 
         iteration += 1
