@@ -13,8 +13,8 @@ if __name__ == '__main__':
     # args 파싱 방식으로 수정하기
     ######################
     fn_cluster = "cluster"
-    fn_log = "./log/latest_log_sec"
-    fn_res = "./result/latest_sdc_original_score_sleep_applied"
+    fn_log = "./log/2nd_log_ms"
+    fn_res = "./result/LATEST_sdc_altered_synthetic_log_20_ms"
 
     # topo = []
     delegate_queue = []
@@ -44,7 +44,7 @@ if __name__ == '__main__':
         executing_job_queues.append(executing_job_queue)
         finished_job_queues.append(finished_job_queue)
 
-    fin_job_num = [0, 0, 0, 0, 0] # delegate / fetcher / dispatcher / execute / release
+    fin_job_num = [0, 0, 0, 0, 0, 0] # delegate / fetcher / dispatcher / execute / release / now_executing
 
     stop_event = threading.Event()
     monitor_thread = threading.Thread(target=run_monitor, args=(tplg, topo, fn_res, stop_event, fin_job_num))

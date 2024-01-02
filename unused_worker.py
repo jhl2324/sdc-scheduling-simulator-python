@@ -13,10 +13,10 @@ t_st = cur_time_ms()
 t_prev = cur_time_ms()
 t_curr = cur_time_ms()
 
-with open('result/lambda/latest_log_lambda', 'w') as lambda_file:
-    pass
-with open('result/period/latest_log_flush_period', 'w') as period_file:
-    pass
+#with open('result/lambda/latest_log_lambda', 'w') as lambda_file:
+ #   pass
+#with open('result/period/latest_log_flush_period', 'w') as period_file:
+ #   pass
 
 
 def run_worker(job_log, topo, delegate_queue, submitted_job_queue, fin_job_num):
@@ -43,11 +43,11 @@ def run_worker(job_log, topo, delegate_queue, submitted_job_queue, fin_job_num):
 
     t_flush = t_curr - t_prev
 
-    is_mid_time_to_flush_sdc_advanced = (t_flush > (flush_period / 2000)) and (
-            is_mid_checked == False) and scheduling_policy == 'sdc_advanced'
+    is_mid_time_to_flush_sdc_advanced = (t_flush > (flush_period / 2)) and (
+            is_mid_checked == False) and scheduling_policy == 'sdc_advanced' and len(delegate_queue) > 0
     is_time_to_flush_sdc_advanced = (t_flush > flush_period) and (
-            scheduling_policy == 'sdc_advanced')
-    is_time_to_flush_others = (t_flush > flush_period) and (scheduling_policy != 'sdc_advanced')
+            scheduling_policy == 'sdc_advanced') and len(delegate_queue) > 0
+    is_time_to_flush_others = (t_flush > flush_period) and (scheduling_policy != 'sdc_advanced') and len(delegate_queue) > 0
 
     if is_mid_time_to_flush_sdc_advanced:
         is_mid_checked = True
@@ -125,17 +125,14 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
             else:
                 normalized_pending_time_list = list(map(lambda x: 0.5, pending_time_list))
 
-            normalized_score_list = []
-
-            for i in range(len(delegate_queue)):
-                score = (normalized_req_num_cores_list[i] * normalized_pending_time_list[i])
-
             #global period_queue
             lambda_val = 1 / ((period_queue[1] / period_queue[0]) + 1)
+            #with open('result/lambda/latest_log_lambda', 'a') as lambda_file:
+             #   lambda_file.write(str(lambda_val) + '\n')
             #print(f'+++++++++++++ lambda : {lambda_val}+++++++++++')
 
             for i in range(len(delegate_queue)):
-                # scoring에서 lambda 고려 X
+                # altered scoring
                 delegate_queue[i].score =  normalized_req_num_cores_list[i] * normalized_pending_time_list[i]
 
             delegate_queue.sort(key=lambda x: x.score, reverse=True)
@@ -165,10 +162,8 @@ def execute_scheduling_policy(topo, delegate_queue, submitted_job_queue, schedul
         is_mid_checked = False
 
         #print(f'+++++++++++++ period : {flush_period}+++++++++++')
-        with open('result/period/latest_log_flush_period', 'a') as file:
-            file.write(str(flush_period) + '\n')
-        with open('result/lambda/latest_log_lambda', 'a') as lambda_file:
-            lambda_file.write(str(lambda_val) + '\n')
+        #with open('result/period/latest_log_flush_period', 'a') as file:
+         #   file.write(str(flush_period) + '\n')
 
     global t_prev
     # t_curr 했을 때와 차이 심한가?
@@ -223,7 +218,7 @@ def two_stage_process(virt_topo, delegate_queue, submitted_job_queue, fin_job_nu
 
             for k in range(len(virt_topo[j])):
                 if (virt_topo[j][k].avail_num_cores >= temp_vec_b[i].required_num_cores) and (
-                        virt_topo[j][k].avail_num_cores < min_val):
+                        virt_topo[j][k].avail_num_cores <= min_val):
                     min_val = virt_topo[j][k].avail_num_cores
                     min_idx_queue = j
                     min_idx_host = k
