@@ -78,12 +78,12 @@ def run_monitor(tplg, topo, fn_res, stop_event, fin_job_num):
         util_ovr_per = ovr_core / num_core
         printer += f" {util_ovr_per:.6f}   \n"
 
-        printer += f"==== total : 22467 ===="
         printer += f" delegate_job_num : {fin_job_num[0]}"
         printer += f" fetcher_job_num : {fin_job_num[1]}"
         printer += f" dispatcher_job_num : {fin_job_num[2]}"
         printer += f" execute_job_num : {fin_job_num[3]}"
         printer += f" release_job_num : {fin_job_num[4]}"
+        printer += f" now_executing_job_num : {fin_job_num[5]}"
 
         print(printer)
         # if flag_fout:

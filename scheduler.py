@@ -1,6 +1,6 @@
 from timer import cur_time_ms
 
-with open('result/waiting_time/latest_log_waiting_time', 'w') as waiting_time_file:
+with open('result/waiting_time/LATEST_sdc_original_2nd_log_ms_waiting_time', 'w') as waiting_time_file:
     pass
 
 
@@ -28,6 +28,7 @@ def run_dispatcher(topo, waiting_job_queue, executing_job_queue, finished_job_qu
                 executing_job_queue.append(job)
 
                 fin_job_num[2] += 1
+                fin_job_num[5] += 1
 
                 break
 
@@ -54,6 +55,7 @@ def execute_job(executing_job_queue, finished_job_queue, fin_job_num):
         if is_execution_finished:
             finished_job_queue.append(job)
             fin_job_num[3] += 1
+            fin_job_num[5] -= 1
         else:
             temp_executing_job_queue.append(job)
 
@@ -79,7 +81,7 @@ def release_resource(topo, finished_job_queue, fin_job_num):
         printer += f'{job.job_id} {job.waiting_time} {job.queue_type}\n'
 
         # waiting time 관련 로그 저장
-    with open('result/waiting_time/latest_log_waiting_time', 'w') as waiting_time_file:
+    with open('result/waiting_time/LATEST_sdc_original_2nd_log_ms_waiting_time', 'a') as waiting_time_file:
         waiting_time_file.write(printer)
 
     finished_job_queue.clear()
